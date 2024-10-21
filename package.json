@@ -12,6 +12,7 @@
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.12.2",
     "leaflet": "^1.9.4",
+    "leaflet.smoothwheelzoom": "alexatiks/Leaflet.SmoothWheelZoom.git",
     "nuxt": "^3.13.0",
     "vue": "latest",
     "vue-router": "latest"

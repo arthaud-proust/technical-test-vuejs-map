@@ -4,6 +4,7 @@
 <script setup lang="ts">
 import type {Marker} from "~/utils/types/marker";
 import L from 'leaflet';
+import 'leaflet.smoothwheelzoom';
 import 'leaflet/dist/leaflet.css'
 
 const props = defineProps<{
@@ -26,6 +27,11 @@ onMounted(() => {
             crs: L.CRS.Simple,
             minZoom: -3,
             maxZoom: 2,
+            zoomControl: false,
+            scrollWheelZoom: false, // disable original zoom function
+            // @ts-expect-error
+            smoothWheelZoom: true,  // enable smooth zoom
+            smoothSensitivity: 1.5,   // zoom speed. default is 1
         })
         .fitBounds(floorPlanImageBounds)
         .setView([floorPlanImage.height / 2, floorPlanImage.width / 2], -1)

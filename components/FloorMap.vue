@@ -6,11 +6,16 @@ import type {Marker} from "~/utils/types/marker";
 import L from 'leaflet';
 import 'leaflet.smoothwheelzoom';
 import 'leaflet/dist/leaflet.css'
+import {createVNode, render} from "vue";
 
 const props = defineProps<{
     floorPlanUrl: string,
     markers: Array<Marker>
 }>();
+
+const slots = defineSlots<{
+    marker(props: { label: string, imageUrl?: string }): any;
+}>()
 
 const map = ref();
 const mapContainer = ref<HTMLDivElement>();
@@ -18,7 +23,7 @@ const mapContainer = ref<HTMLDivElement>();
 const zoomOnMarker = (marker: Marker) => {
     if (!marker) return
 
-    map.value.setView([marker.x, marker.y], 1)
+    map.value.setView([marker.y, marker.x], 1)
 }
 
 defineExpose({
@@ -31,28 +36,47 @@ const floorPlanImageBounds = [
     [floorPlanImage.height, floorPlanImage.width]
 ] as L.LatLngBoundsExpression
 
-const leafletMarkers = ref<Record<number, L.Marker>>({})
-const updateMarkers = (markers: Array<Marker>) => {
-    const markerIds = markers.map(marker => marker.id)
+const leafletMarkers = new Map<number, L.Marker>();
+const deleteMarker = (markerId: number) => {
+    leafletMarkers.get(markerId)?.remove()
+    leafletMarkers.delete(markerId)
+}
+const updateMarker = (marker: Marker) => {
+    const existingMarker = leafletMarkers.get(marker.id)
+    if (existingMarker) {
+        deleteMarker(marker.id)
+    }
 
-    Object.keys(leafletMarkers.value).map(Number).forEach(markerId => {
+    const html = document.createElement('div')
+
+    render(
+        createVNode(slots.marker, {
+            label: marker.label,
+            imageUrl: marker.imageUrl
+        }),
+        html
+    )
+
+    const customIcon = L.divIcon({html})
+
+    const leafletMarker = L.marker([marker.y, marker.x], {icon: customIcon})
+
+    leafletMarker.addTo(map.value)
+
+    leafletMarkers.set(marker.id, leafletMarker)
+}
+const updateMarkers = (markers: Array<Marker>) => {
+    const markerIds = markers.map(marker => marker.id);
+
+    for (const [markerId] of leafletMarkers) {
         const markedRemoved = !markerIds.includes(markerId)
 
         if (markedRemoved) {
-            leafletMarkers.value[markerId].remove()
-            delete leafletMarkers.value[markerId]
+            deleteMarker(markerId)
         }
-    })
+    }
 
-    markers.forEach(marker => {
-        const existingMarker = leafletMarkers.value[marker.id]
-
-        if (existingMarker) {
-            leafletMarkers.value[marker.id].setLatLng([marker.x, marker.y])
-        } else {
-            leafletMarkers.value[marker.id] = L.marker([marker.x, marker.y]).addTo(map.value)
-        }
-    })
+    markers.forEach(updateMarker)
 }
 watch(() => props.markers, (markers) => {
     updateMarkers(markers)

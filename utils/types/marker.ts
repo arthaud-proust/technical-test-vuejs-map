@@ -3,4 +3,5 @@ export type Marker = {
     x: number,
     y: number,
     label: string
+    imageUrl?: string
 }

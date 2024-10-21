@@ -11,13 +11,7 @@ const props = defineProps<{
     markers: Array<Marker>
 }>();
 
-const floorPlanImage: HTMLImageElement = await (() => new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-    image.src = props.floorPlanUrl;
-}))()
-
+const floorPlanImage = await getImageSizes(props.floorPlanUrl)
 const floorPlanImageBounds = [
     [0, 0],
     [floorPlanImage.height, floorPlanImage.width]

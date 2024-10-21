@@ -1,8 +1,8 @@
 <template>
     <div class="container mx-auto">
-        <h1>Floor Map</h1>
+        <h1 class="mt-4 ">Floor Map</h1>
         <ClientOnly>
-            <FloorMap ref="floorMapRef" id="floor-map" :markers="markers" :floorPlanUrl="floorPlanUrl">
+            <FloorMap ref="floorMapRef" id="floor-map" class="mt-4" :markers="markers" :floorPlanUrl="floorPlanUrl">
                 <template #marker="{label, imageUrl}">
                     <FloorMapMarker :label="label" :imageUrl="imageUrl" />
                 </template>

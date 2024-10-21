@@ -1,5 +1,5 @@
 <template>
-    <div ref="mapContainer"></div>
+    <div ref="mapContainer" class="overflow-hidden rounded-xl"></div>
 </template>
 <script setup lang="ts">
 import type {Marker} from "~/utils/types/marker";
@@ -26,9 +26,11 @@ const zoomOnMarker = (marker: Marker) => {
     map.value.setView([marker.y, marker.x], 1)
 }
 
+
 defineExpose({
     zoomOnMarker,
 })
+
 
 const floorPlanImage = await getImageSizes(props.floorPlanUrl)
 const floorPlanImageBounds = [
@@ -36,19 +38,21 @@ const floorPlanImageBounds = [
     [floorPlanImage.height, floorPlanImage.width]
 ] as L.LatLngBoundsExpression
 
+
 const leafletMarkers = new Map<number, L.Marker>();
+
 const deleteMarker = (markerId: number) => {
     leafletMarkers.get(markerId)?.remove()
     leafletMarkers.delete(markerId)
 }
-const updateMarker = (marker: Marker) => {
+
+const createOrUpdateMarker = (marker: Marker) => {
     const existingMarker = leafletMarkers.get(marker.id)
     if (existingMarker) {
         deleteMarker(marker.id)
     }
 
     const html = document.createElement('div')
-
     render(
         createVNode(slots.marker, {
             label: marker.label,
@@ -56,7 +60,6 @@ const updateMarker = (marker: Marker) => {
         }),
         html
     )
-
     const customIcon = L.divIcon({html})
 
     const leafletMarker = L.marker([marker.y, marker.x], {icon: customIcon})
@@ -65,22 +68,23 @@ const updateMarker = (marker: Marker) => {
 
     leafletMarkers.set(marker.id, leafletMarker)
 }
+
 const updateMarkers = (markers: Array<Marker>) => {
     const markerIds = markers.map(marker => marker.id);
 
     for (const [markerId] of leafletMarkers) {
-        const markedRemoved = !markerIds.includes(markerId)
-
-        if (markedRemoved) {
+        if (!markerIds.includes(markerId)) {
             deleteMarker(markerId)
         }
     }
 
-    markers.forEach(updateMarker)
+    markers.forEach(createOrUpdateMarker)
 }
+
 watch(() => props.markers, (markers) => {
     updateMarkers(markers)
 })
+
 
 onMounted(() => {
     map.value = L

@@ -1,7 +1,9 @@
 <template>
     <div>
         <h1>Floor Map</h1>
-        <FloorMap id="floor-map" :markers="markers" :floorPlanUrl="floorPlanUrl" />
+        <client-only>
+            <FloorMap ref="floorMap" id="floor-map" :markers="markers" :floorPlanUrl="floorPlanUrl" />
+        </client-only>
     </div>
 </template>
 
